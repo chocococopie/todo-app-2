@@ -1,30 +1,53 @@
-import { useState, useEffect } from 'react'
-import './App.css'
-import Double from './components/Hello'
+import "./App.css";
+import { useState, useEffect } from "react";
 
 function App() {
+  const [todo, setTodo] = useState(() => {
+    const saved = localStorage.getItem("todoList");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [input, setInput] = useState("");
 
+  function handleChange(event) {
+    setInput(event.target.value);
+  }
 
-const [count, setCount] = useState(() => {
-  const saved = localStorage.getItem('count');
-  return saved !== null ? Number(saved) : 0;
-});
+  function handleSubmit(event) {
+    event.preventDefault();
+    setTodo([...todo, input]);
+    setInput("");
+  }
 
-useEffect(()=>{
-  localStorage.setItem('count', count)
-}, [count]);
+  function handleDelete(i) {
+    const uptatedTodo = todo.filter((todo, index) => index != i);
+    setTodo(uptatedTodo);
+  }
 
-  const doubled = Double(count)
+  useEffect(() => {
+    localStorage.setItem("todoList", JSON.stringify(todo));
+  }, [todo]);
 
   return (
     <>
-    <p>Count: {count}</p>
-    <p>Doubled: {doubled}</p>
-    <button onClick={() => setCount(count + 1)}>+</button>
-    <button onClick={() => {setCount(count > 0 ? count -1 : 0)}}>-</button>
-    <button onClick={() => {setCount(0); localStorage.removeItem('count')}}>Reset</button>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={input}
+          onChange={handleChange}
+          placeholder="Type a task"
+        />
+        <button type="submit">Add</button>
+      </form>
+      <ul>
+        {todo.map((todo, index) => (
+          <li key={index}>
+            {todo}
+            <button onClick={() => handleDelete(index)}>x</button>
+          </li>
+        ))}
+      </ul>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
